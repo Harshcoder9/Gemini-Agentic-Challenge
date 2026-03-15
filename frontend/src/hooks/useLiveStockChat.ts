@@ -19,6 +19,7 @@ interface UseLiveStockChatResult {
   interrupt: () => void;
   sendAudioChunk: (chunkBase64: string, mimeType: string) => void;
   commitAudio: (transcript?: string) => void;
+  clearMessages: () => void;
 }
 
 const INITIAL_MESSAGE: LiveChatMessage = {
@@ -246,6 +247,21 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
     }
   }, []);
 
+  const clearMessages = useCallback(() => {
+    setMessages([INITIAL_MESSAGE]);
+    setError('');
+    
+    // Also reset backend session state
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(
+        JSON.stringify({
+          type: 'session.init',
+          symbols,
+        })
+      );
+    }
+  }, [symbols]);
+
   return {
     messages,
     loading,
@@ -255,5 +271,6 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
     interrupt,
     sendAudioChunk,
     commitAudio,
+    clearMessages,
   };
 }

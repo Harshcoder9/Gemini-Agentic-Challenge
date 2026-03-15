@@ -74,7 +74,7 @@ export function GlobalVoiceAssistant() {
 
   // No symbols = general finance chatbot mode
   const connectionSymbols = useMemo(() => (isOpen ? ['GENERAL'] : []), [isOpen]);
-  const { messages, loading, connected, error, sendMessage, interrupt } = useLiveStockChat({
+  const { messages, loading, connected, error, sendMessage, interrupt, clearMessages } = useLiveStockChat({
     symbols: connectionSymbols,
   });
 
@@ -205,6 +205,14 @@ export function GlobalVoiceAssistant() {
                 <span className="font-semibold">FinAI🤖</span>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={clearMessages}
+                  className="text-[10px] sm:text-xs rounded px-2 py-1 transition bg-white/20 text-white hover:bg-white/30"
+                  aria-label="Clear chat"
+                  title="Clear chat history"
+                >
+                  🧹 Clear
+                </button>
                 <button
                   onClick={toggleTts}
                   className={`text-[10px] sm:text-xs rounded px-2 py-1 transition ${
