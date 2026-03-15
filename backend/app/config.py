@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     firebase_service_account: str = ""
 
     # CORS – comma-separated list of allowed origins
-    allowed_origins: str = "http://localhost:3000"
+    allowed_origins: str = "*"
 
     @property
     def origins_list(self) -> list[str]:
