@@ -3,14 +3,14 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source
-COPY . .
+COPY backend/ .
 
-# Cloud Run injects PORT env var; default to 8000 locally
-ENV PORT=8000
+# Cloud Run injects PORT env var; default to 8080
+ENV PORT=8080
 
 EXPOSE $PORT
 
