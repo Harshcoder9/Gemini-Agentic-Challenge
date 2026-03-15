@@ -3,6 +3,10 @@
 ## 💡 Pitch
 Retail investors are overwhelmed by scattered financial data, complex charts, and fragmented news. FinAgent solves this by providing a unified, multimodal "Live Agent" that acts as your personal financial analyst. It uses Gemini's advanced reasoning to instantly parse local market contexts, execute technical chart vision analyses, and hold real-time bi-directional audio discussions on market movements so you never have to context-switch again.
 
+> **![FinAgent Dashboard](./docs/assets/dashboard.png)**
+> **![FinAgent Chart Vision](./docs/assets/chart_vision.png)**
+> **![FinAgent News Sentiments](./docs/assets/news_sentiments.png)**
+
 ---
 
 ## 🛠️ Category Selection: Live Agents
