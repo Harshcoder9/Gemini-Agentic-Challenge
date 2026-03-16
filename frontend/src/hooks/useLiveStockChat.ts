@@ -64,17 +64,6 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
     if (httpBase && httpBase.includes('kwraehs2jq')) {
       httpBase = PROD_BACKEND_URL;
     }
-
-    if (!httpBase && typeof window !== 'undefined') {
-       if (window.location.hostname.includes('run.app')) {
-          httpBase = PROD_BACKEND_URL;
-       } else {
-          httpBase = `${window.location.protocol}//${window.location.hostname}:8000`;
-       }
-    }
-
-    console.log('[useLiveStockChat] process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-    console.log('[useLiveStockChat] Final httpBase used:', httpBase);
     
     return toWebSocketUrl(httpBase || PROD_BACKEND_URL);
   }, []);
