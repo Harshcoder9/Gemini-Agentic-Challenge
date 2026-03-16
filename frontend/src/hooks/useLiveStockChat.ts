@@ -60,8 +60,12 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
     const PROD_BACKEND_URL = 'https://finagent-backend-869601020087.us-central1.run.app';
     let httpBase = process.env.NEXT_PUBLIC_API_URL;
     
+    // Aggressive override if the OLD/WRONG backend is detected in env
+    if (httpBase && httpBase.includes('kwraehs2jq')) {
+      httpBase = PROD_BACKEND_URL;
+    }
+
     if (!httpBase && typeof window !== 'undefined') {
-       // In production, fallback to our known backend if on the run.app domain
        if (window.location.hostname.includes('run.app')) {
           httpBase = PROD_BACKEND_URL;
        } else {

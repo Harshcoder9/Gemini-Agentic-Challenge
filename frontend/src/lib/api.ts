@@ -14,9 +14,15 @@ import type {
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 
 const PROD_BACKEND_URL = 'https://finagent-backend-869601020087.us-central1.run.app';
+let API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || PROD_BACKEND_URL;
+
+// Aggressive override if the OLD/WRONG backend is detected in env
+if (API_BASE_URL.includes('kwraehs2jq')) {
+  API_BASE_URL = PROD_BACKEND_URL;
+}
 
 const api = axios.create({
-  baseURL: (process.env.NEXT_PUBLIC_API_URL || PROD_BACKEND_URL).replace(/\/$/, '') + '/api',
+  baseURL: API_BASE_URL.replace(/\/$/, ''), // Do not add /api here, it's in the endpoints
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
