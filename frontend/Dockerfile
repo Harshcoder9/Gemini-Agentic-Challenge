@@ -1,9 +1,9 @@
 # Build Stage
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY frontend/package*.json ./
+COPY package*.json ./
 RUN npm install
-COPY frontend/ .
+COPY . .
 # Note: We'll override this env var at runtime if needed, but Next.js often bundles envs at build time for client-side.
 # For Cloud Run, we should ideally build with the variable if we want it in the bundle.
 ARG NEXT_PUBLIC_API_URL
