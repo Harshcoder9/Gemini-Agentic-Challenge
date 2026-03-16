@@ -23,11 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
-      setUser(firebaseUser);
+    // Safety check: only subscribe if 'auth' is properly initialized
+    if (auth && typeof auth.onAuthStateChanged === 'function') {
+      const unsubscribe = onAuthStateChanged(auth, firebaseUser => {
+        setUser(firebaseUser);
+        setLoading(false);
+      });
+      return unsubscribe;
+    } else {
+      console.warn('[AuthContext] Firebase auth is not fully initialized or configured.');
       setLoading(false);
-    });
-    return unsubscribe;
+    }
   }, []);
 
   const signInWithGoogle = async () => {
