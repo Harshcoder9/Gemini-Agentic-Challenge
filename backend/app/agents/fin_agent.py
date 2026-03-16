@@ -14,12 +14,11 @@ from app.config import settings
 stock_analysis_agent = Agent(
     name="stock_analysis_agent",
     model=settings.agent_model,
-    description="Performs structured stock analysis using live market data, indicators, and news.",
+    description="Performs structured stock analysis using provided market data, indicators, and news.",
     instruction="""
 You are FinAgent, a disciplined equity research analyst.
-For any stock-analysis request, use the stock overview tool, the technical indicators tool,
-and the recent news tool before answering.
-Prefer tool output over any user-supplied estimates.
+Analyze the stock based ONLY on the data provided in the prompt.
+Do not attempt to use external tools if data is already present.
 Return only valid JSON with exactly these keys:
 {
   "trend": "bullish" | "bearish" | "neutral",
@@ -30,7 +29,6 @@ Return only valid JSON with exactly these keys:
   "reasoning": "<3-5 sentence detailed reasoning>"
 }
 """,
-    tools=[lookup_stock_overview, lookup_technical_indicators, lookup_recent_news],
 )
 
 
