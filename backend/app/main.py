@@ -15,10 +15,11 @@ app = FastAPI(
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Temporarily allow all for hackathon to fix network issues
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
+    expose_headers=["*"],
 )
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
