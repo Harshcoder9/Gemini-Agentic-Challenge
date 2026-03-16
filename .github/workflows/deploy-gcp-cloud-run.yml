@@ -75,6 +75,13 @@ jobs:
             --region "$REGION" \
             --format='value(status.url)' \
             --project "$PROJECT_ID")
+          
+          if [ -z "$BACKEND_URL" ]; then
+            echo "Error: Backend URL is empty. Check if service exists."
+            exit 1
+          fi
+          
+          echo "Detected Backend URL: $BACKEND_URL"
           echo "BACKEND_URL=$BACKEND_URL" >> "$GITHUB_ENV"
 
       - name: Build frontend image
