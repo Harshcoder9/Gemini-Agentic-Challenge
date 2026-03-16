@@ -22,7 +22,12 @@ def _json_from_text(text: str) -> dict:
 
 
 def _prepare_environment() -> None:
-    os.environ["GOOGLE_API_KEY"] = settings.gemini_api_key
+    # Always refresh the key from settings to ensure we pick up secret manager changes
+    api_key = settings.gemini_api_key
+    if api_key:
+        os.environ["GOOGLE_API_KEY"] = api_key
+    else:
+        print("[Runner] WARNING: gemini_api_key is empty in settings!")
 
 
 async def run_agent_text(
