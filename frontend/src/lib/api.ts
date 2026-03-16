@@ -13,8 +13,10 @@ import type {
 
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 
+const PROD_BACKEND_URL = 'https://finagent-backend-869601020087.us-central1.run.app';
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000',
+  baseURL: (process.env.NEXT_PUBLIC_API_URL || PROD_BACKEND_URL).replace(/\/$/, '') + '/api',
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',

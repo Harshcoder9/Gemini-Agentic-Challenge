@@ -57,18 +57,22 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
   const streamingAssistantIdRef = useRef<string | null>(null);
 
   const wsUrl = useMemo(() => {
+    const PROD_BACKEND_URL = 'https://finagent-backend-869601020087.us-central1.run.app';
     let httpBase = process.env.NEXT_PUBLIC_API_URL;
     
     if (!httpBase && typeof window !== 'undefined') {
-       // In production, often the API is on a similar domain or we can infer it
-       // But for now, let's just use what we have or a placeholder to avoid crash
-       httpBase = `${window.location.protocol}//${window.location.hostname}:8000`;
+       // In production, fallback to our known backend if on the run.app domain
+       if (window.location.hostname.includes('run.app')) {
+          httpBase = PROD_BACKEND_URL;
+       } else {
+          httpBase = `${window.location.protocol}//${window.location.hostname}:8000`;
+       }
     }
 
     console.log('[useLiveStockChat] process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
     console.log('[useLiveStockChat] Final httpBase used:', httpBase);
     
-    return toWebSocketUrl(httpBase || 'http://localhost:8000');
+    return toWebSocketUrl(httpBase || PROD_BACKEND_URL);
   }, []);
 
   useEffect(() => {
