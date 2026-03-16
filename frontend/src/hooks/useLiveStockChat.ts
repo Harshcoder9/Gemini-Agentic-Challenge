@@ -57,16 +57,18 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
   const streamingAssistantIdRef = useRef<string | null>(null);
 
   const wsUrl = useMemo(() => {
-    const inferredBase =
-      typeof window !== 'undefined'
-        ? `${window.location.protocol}//${window.location.hostname}:8000`
-        : 'http://localhost:8000';
-    const httpBase = process.env.NEXT_PUBLIC_API_URL || inferredBase;
+    let httpBase = process.env.NEXT_PUBLIC_API_URL;
     
+    if (!httpBase && typeof window !== 'undefined') {
+       // In production, often the API is on a similar domain or we can infer it
+       // But for now, let's just use what we have or a placeholder to avoid crash
+       httpBase = `${window.location.protocol}//${window.location.hostname}:8000`;
+    }
+
     console.log('[useLiveStockChat] process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
     console.log('[useLiveStockChat] Final httpBase used:', httpBase);
     
-    return toWebSocketUrl(httpBase);
+    return toWebSocketUrl(httpBase || 'http://localhost:8000');
   }, []);
 
   useEffect(() => {
