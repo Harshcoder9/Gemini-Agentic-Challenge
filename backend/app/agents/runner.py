@@ -11,7 +11,11 @@ import re
 import uuid
 
 # Maximum seconds to wait for a single agent run before giving up
-_AGENT_TIMEOUT_SECONDS = 50
+_AGENT_TIMEOUT_SECONDS = 120
+
+# Global lock to prevent parallel Gemini requests from hitting rate limits (429)
+# Especially important for Free Tier where 15 RPM is the limit.
+_GEMINI_LOCK = asyncio.Semaphore(1)
 
 
 def _json_from_text(text: str) -> dict:
@@ -61,12 +65,13 @@ async def run_agent_text(
         message_parts.extend(inline_parts)
 
     async def _collect() -> str:
-        last = ""
-        async for event in runner.run_async(
-            user_id=user_id,
-            session_id=session_id,
-            new_message=types.Content(role="user", parts=message_parts),
-        ):
+        async with _GEMINI_LOCK:
+            last = ""
+            async for event in runner.run_async(
+                user_id=user_id,
+                session_id=session_id,
+                new_message=types.Content(role="user", parts=message_parts),
+            ):
             if event.error_message:
                 raise RuntimeError(event.error_message)
             if not event.content or not event.content.parts or event.author != agent.name:
