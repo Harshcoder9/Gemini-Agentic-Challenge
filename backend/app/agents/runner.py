@@ -74,12 +74,18 @@ async def run_agent_text(
 
     try:
         agent_timeout = timeout or _AGENT_TIMEOUT_SECONDS
+        print(f"[Runner] Starting agent {agent.name} with timeout {agent_timeout}s")
         last_text = await asyncio.wait_for(_collect(), timeout=agent_timeout)
+        print(f"[Runner] Agent {agent.name} finished successfully")
     except asyncio.TimeoutError:
+        print(f"[Runner] TIMEOUT for agent {agent.name}")
         raise RuntimeError(
             f"Agent '{agent.name}' did not respond within {agent_timeout}s. "
             "The Gemini model may be overloaded — please retry."
         )
+    except Exception as e:
+        print(f"[Runner] ERROR for agent {agent.name}: {str(e)}")
+        raise e
 
     if not last_text:
         raise RuntimeError(f"Agent '{agent.name}' returned no text output.")
