@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # Google Gemini
     gemini_api_key: str = ""
     agent_app_name: str = "finagent"
-    agent_model: str = "gemini-2.5-flash-lite"
+    agent_model: str = "gemini-2.0-flash"
 
     # NewsAPI
     news_api_key: str = ""
