@@ -31,8 +31,18 @@ app.include_router(live.router,      prefix="/api/live",      tags=["live"])
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "*",
+        "Access-Control-Allow-Headers": "*",
+    }
+    
     if isinstance(exc, StarletteHTTPException):
-        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+        return JSONResponse(
+            status_code=exc.status_code, 
+            content={"detail": exc.detail},
+            headers=headers
+        )
 
     error_msg = str(exc)
     
@@ -41,18 +51,21 @@ async def global_exception_handler(request: Request, exc: Exception):
         return JSONResponse(
             status_code=429,
             content={"detail": "⏳ FinAI is currently analyzing too many requests. Please wait 45 seconds and try again."},
+            headers=headers
         )
         
     # Handle Yahoo Finance 429 Rate Limits / Network errors
     if "Too Many Requests" in error_msg or "429 Client Error" in error_msg:
         return JSONResponse(
             status_code=429,
-            content={"detail": "Market data provider (Yahoo Finance) is currently rate-limiting your IP. This is common during local testing and will resolve automatically. Try again soon."},
+            content={"detail": "Market data provider (Yahoo Finance) is currently rate-limiting this Cloud Run instance. This is a common shared-IP issue. Try refreshing in a few seconds."},
+            headers=headers
         )
 
     return JSONResponse(
         status_code=500,
-        content={"detail": "An unexpected error occurred. Please try again."},
+        content={"detail": f"An unexpected error occurred: {error_msg}. Please try again."},
+        headers=headers
     )
 
 @app.get("/health", tags=["health"])

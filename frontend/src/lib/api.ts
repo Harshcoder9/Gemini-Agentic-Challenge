@@ -21,8 +21,12 @@ if (API_BASE_URL.includes('kwraehs2jq')) {
   API_BASE_URL = PROD_BACKEND_URL;
 }
 
+// Clean the base URL: remove trailing slashes AND remove trailing /api if any 
+// because we add it manually in the endpoints for clarity
+const FINAL_BASE_URL = API_BASE_URL.replace(/\/$/, '').replace(/\/api$/, '');
+
 const api = axios.create({
-  baseURL: API_BASE_URL.replace(/\/$/, ''), // Do not add /api here, it's in the endpoints
+  baseURL: FINAL_BASE_URL,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
