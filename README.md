@@ -3,9 +3,9 @@
 ## 💡 Pitch
 Retail investors are overwhelmed by scattered financial data, complex charts, and fragmented news. FinAgent solves this by providing a unified, multimodal "Live Agent" that acts as your personal financial analyst. It uses Gemini's advanced reasoning to instantly parse local market contexts, execute technical chart vision analyses, and hold real-time bi-directional audio discussions on market movements so you never have to context-switch again.
 
-![FinAgent Dashboard](./docs/assets/dashboard.png)
+![FinAgent Portfolio](./docs/assets/portfolio_dashboard.png)
 ![FinAgent Chart Vision](./docs/assets/chart_vision.png)
-![FinAgent News Sentiments](./docs/assets/news_sentiments.png)
+![FinAgent Portfolio Risk](./docs/assets/portfolio_risk.png)
 
 ---
 
@@ -23,7 +23,7 @@ Below is the high-level architecture of the system:
 graph TD
     User([User]) <--> |Voice/Text UI| Frontend[Next.js Frontend Client]
     Frontend <--> |WebSocket & REST| Backend[FastAPI Backend - GCP Cloud Run]
-    Backend <--> |Gemini GenAI SDK| Gemini[Gemini 2.5 Flash / Vision]
+    Backend <--> |Gemini GenAI SDK| Gemini[Gemini 2.0 Flash / Vision]
     Backend <--> |Market Data API| Yahoo[Yahoo Finance API]
     Backend <--> |News API| News[NewsAPI]
 
