@@ -105,9 +105,6 @@ async def get_stock_news(symbol: str) -> dict:
 
     # Run Gemini sentiment analysis on the headlines
     headlines = [a["title"] for a in articles_raw if a.get("title")]
-    # Use clean name (no .NS/.BO) for Gemini prompt
-    clean_symbol = symbol.split(".")[0] if "." in symbol else symbol
-    sentiment_result = await analyze_news_sentiment(clean_symbol, headlines)
 
     # Per-article lightweight sentiment classification
     positive_words = {"surge", "soar", "gain", "jump", "rise",
@@ -115,11 +112,35 @@ async def get_stock_news(symbol: str) -> dict:
     negative_words = {"drop", "fall", "miss", "layoff", "loss",
                       "decline", "crash", "sell", "cut", "down", "risk"}
 
+    # Start with a local fallback so the endpoint still succeeds when Gemini is rate-limited.
+    sentiment_result = {
+        "sentimentScore": 0.0,
+        "sentimentLabel": "neutral",
+        "keyThemes": ["market update", "company news", "analyst commentary"],
+        "oneLinerSummary": f"Recent {symbol} headlines are mixed.",
+    }
+
+    if headlines:
+        try:
+            # Use clean name (no .NS/.BO) for Gemini prompt
+            clean_symbol = symbol.split(".")[0] if "." in symbol else symbol
+            sentiment_result = await analyze_news_sentiment(clean_symbol, headlines)
+        except Exception as exc:
+            logger.warning(
+                "Gemini sentiment unavailable for %s; using local fallback sentiment (%s)",
+                symbol,
+                exc,
+            )
+
     articles = []
+    total_pos = 0
+    total_neg = 0
     for a in articles_raw[:10]:
         title = (a.get("title") or "").lower()
         pos = sum(1 for w in positive_words if w in title)
         neg = sum(1 for w in negative_words if w in title)
+        total_pos += pos
+        total_neg += neg
         sentiment = "positive" if pos > neg else "negative" if neg > pos else "neutral"
         articles.append(
             {
@@ -131,6 +152,17 @@ async def get_stock_news(symbol: str) -> dict:
                 "sentiment":   sentiment,
             }
         )
+
+    # If Gemini was unavailable, derive a basic aggregate sentiment from headline keywords.
+    if sentiment_result.get("oneLinerSummary") == f"Recent {symbol} headlines are mixed.":
+        if total_pos > total_neg:
+            sentiment_result["sentimentLabel"] = "positive"
+            sentiment_result["sentimentScore"] = 0.35
+            sentiment_result["oneLinerSummary"] = f"Recent {symbol} headlines skew modestly positive."
+        elif total_neg > total_pos:
+            sentiment_result["sentimentLabel"] = "negative"
+            sentiment_result["sentimentScore"] = -0.35
+            sentiment_result["oneLinerSummary"] = f"Recent {symbol} headlines skew modestly negative."
 
     return {
         "articles":       articles,
