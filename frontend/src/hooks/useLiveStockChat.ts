@@ -29,13 +29,20 @@ const INITIAL_MESSAGE: LiveChatMessage = {
     'Hi! I am your AI assistant, highly knowledgeable about stock chart patterns and technical analysis. Ask me about any stock or chart pattern!',
 };
 
-function toWebSocketUrl(baseHttpUrl: string): string {
+function toWebSocketUrl(baseHttpUrl: string | undefined): string {
+  if (!baseHttpUrl) {
+    // Fail-safe default
+    return '/api/live/session';
+  }
   const base = baseHttpUrl.replace(/\/$/, '').replace(/\/api$/, '');
   if (base.startsWith('https://')) {
     return `${base.replace('https://', 'wss://')}/api/live/session`;
   }
   if (base.startsWith('http://')) {
     return `${base.replace('http://', 'ws://')}/api/live/session`;
+  }
+  if (base.startsWith('wss://') || base.startsWith('ws://')) {
+    return `${base}/api/live/session`;
   }
   return `ws://${base}/api/live/session`;
 }
@@ -54,7 +61,11 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
       typeof window !== 'undefined'
         ? `${window.location.protocol}//${window.location.hostname}:8000`
         : 'http://localhost:8000';
-    const httpBase = process.env.NEXT_PUBLIC_API_URL ?? inferredBase;
+    const httpBase = process.env.NEXT_PUBLIC_API_URL || inferredBase;
+    
+    console.log('[useLiveStockChat] process.env.NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+    console.log('[useLiveStockChat] Final httpBase used:', httpBase);
+    
     return toWebSocketUrl(httpBase);
   }, []);
 
@@ -97,9 +108,10 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
     };
 
     socket.onmessage = evt => {
-      const event = JSON.parse(evt.data as string);
-      const type = event.type as string;
-      console.log('[useLiveStockChat] Message received:', type, event);
+      try {
+        const event = JSON.parse(evt.data as string);
+        const type = event.type as string;
+        console.log('[useLiveStockChat] Message received:', type, event);
 
       if (type === 'session.ready') {
         // Backend is ready for messages
@@ -153,6 +165,9 @@ export function useLiveStockChat({ symbols }: UseLiveStockChatOptions): UseLiveS
         setError(String(event.message ?? 'Live agent error.'));
         streamingAssistantIdRef.current = null;
         setLoading(false);
+      }
+      } catch (e) {
+        console.error('[useLiveStockChat] Failed to parse WebSocket message:', e, evt.data);
       }
     };
 
