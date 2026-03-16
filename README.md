@@ -6,7 +6,6 @@ Retail investors are overwhelmed by scattered financial data, complex charts, an
 
 ### 🚀 Live Demo
 - **Frontend App:** [https://finagent-frontend-869601020087.us-central1.run.app/](https://finagent-frontend-869601020087.us-central1.run.app/)
-- **API Documentation:** [https://finagent-backend-869601020087.us-central1.run.app/docs](https://finagent-backend-869601020087.us-central1.run.app/docs)
 
 ![FinAgent Main Dashboard](./docs/assets/dashboard.png)
 ![FinAgent PriceChart](./docs/assets/Pricechart.png)
