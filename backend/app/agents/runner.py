@@ -77,24 +77,31 @@ async def run_agent_text(
                 last = event_text.strip()
         return last
 
-    try:
-        agent_timeout = timeout or _AGENT_TIMEOUT_SECONDS
-        print(f"[Runner] Starting agent {agent.name} with timeout {agent_timeout}s")
-        last_text = await asyncio.wait_for(_collect(), timeout=agent_timeout)
-        print(f"[Runner] Agent {agent.name} finished successfully")
-    except asyncio.TimeoutError:
-        print(f"[Runner] TIMEOUT for agent {agent.name}")
-        raise RuntimeError(
-            f"Agent '{agent.name}' did not respond within {agent_timeout}s. "
-            "The Gemini model may be overloaded — please retry."
-        )
-    except Exception as e:
-        print(f"[Runner] ERROR for agent {agent.name}: {str(e)}")
-        raise e
+    max_retries = 3
+    retry_delay = 10
 
-    if not last_text:
-        raise RuntimeError(f"Agent '{agent.name}' returned no text output.")
-    return last_text
+    for attempt in range(max_retries):
+        try:
+            agent_timeout = timeout or _AGENT_TIMEOUT_SECONDS
+            print(f"[Runner] Starting agent {agent.name} (Attempt {attempt+1}/{max_retries})")
+            last_text = await asyncio.wait_for(_collect(), timeout=agent_timeout)
+            print(f"[Runner] Agent {agent.name} finished successfully")
+            return last_text
+        except (RuntimeError, Exception) as e:
+            error_str = str(e)
+            if ("429" in error_str or "RESOURCE_EXHAUSTED" in error_str) and attempt < max_retries - 1:
+                print(f"[Runner] Quota reached (429). Waiting {retry_delay}s for cool down...")
+                await asyncio.sleep(retry_delay)
+                continue
+            
+            if isinstance(e, asyncio.TimeoutError):
+                print(f"[Runner] TIMEOUT for agent {agent.name}")
+                raise RuntimeError(f"Agent '{agent.name}' timed out after {agent_timeout}s.")
+                
+            print(f"[Runner] ERROR for agent {agent.name}: {error_str}")
+            raise e
+    
+    raise RuntimeError(f"Agent '{agent.name}' failed after {max_retries} attempts.")
 
 
 async def run_agent_json(
