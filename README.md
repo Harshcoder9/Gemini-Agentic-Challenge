@@ -30,7 +30,7 @@ Below is the high-level architecture of the system:
 graph TD
     User([User]) <--> |Voice/Text UI| Frontend[Next.js Frontend Client]
     Frontend <--> |WebSocket & REST| Backend[FastAPI Backend - GCP Cloud Run]
-    Backend <--> |Gemini GenAI SDK| Gemini[Gemini 2.0 Flash / Vision]
+    Backend <--> |Gemini GenAI SDK| Gemini[Gemini 2.5 Flash / Vision]
     Backend <--> |Market Data API| Yahoo[Yahoo Finance API]
     Backend <--> |News API| News[NewsAPI]
 
