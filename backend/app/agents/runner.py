@@ -72,15 +72,15 @@ async def run_agent_text(
                 session_id=session_id,
                 new_message=types.Content(role="user", parts=message_parts),
             ):
-            if event.error_message:
-                raise RuntimeError(event.error_message)
-            if not event.content or not event.content.parts or event.author != agent.name:
-                continue
-            event_text = "".join(
-                part.text or "" for part in event.content.parts if getattr(part, "text", None))
-            if event_text:
-                last = event_text.strip()
-        return last
+                if event.error_message:
+                    raise RuntimeError(event.error_message)
+                if not event.content or not event.content.parts or event.author != agent.name:
+                    continue
+                event_text = "".join(
+                    part.text or "" for part in event.content.parts if getattr(part, "text", None))
+                if event_text:
+                    last = event_text.strip()
+            return last
 
     max_retries = 3
     retry_delay = 10
