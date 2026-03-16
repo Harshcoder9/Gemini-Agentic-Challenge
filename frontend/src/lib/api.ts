@@ -187,10 +187,14 @@ export async function analyzeChartImage(
   mimeType: string
 ): Promise<ChartAnalysis> {
   try {
-    const { data } = await api.post<ChartAnalysis>('/api/chart/analyze', {
-      image: base64Image,
-      mime_type: mimeType,
-    });
+    const { data } = await api.post<ChartAnalysis>(
+      '/api/chart/analyze',
+      {
+        image: base64Image,
+        mime_type: mimeType,
+      },
+      { timeout: 60000 }
+    );
     return data;
   } catch (err) {
     normaliseError(err);

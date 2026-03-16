@@ -65,7 +65,7 @@ jobs:
             --region "$REGION" \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "AGENT_APP_NAME=finagent,AGENT_MODEL=gemini-2.5-flash" \
+            --set-env-vars "AGENT_APP_NAME=finagent,AGENT_MODEL=gemini-2.0-flash" \
             --set-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest,NEWS_API_KEY=NEWS_API_KEY:latest,ALLOWED_ORIGINS=ALLOWED_ORIGINS:latest" \
             --project "$PROJECT_ID"
 
