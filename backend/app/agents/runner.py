@@ -17,6 +17,10 @@ _AGENT_TIMEOUT_SECONDS = 120
 # Especially important for Free Tier where 15 RPM is the limit.
 _GEMINI_LOCK = asyncio.Semaphore(1)
 
+# Time tracking for pacing (to stay under 15 RPM = 1 request every 4 seconds)
+_LAST_CALL_TIME = 0.0
+_MIN_PACING_DELAY = 4.5  # Slightly more than 4s to be safe
+
 
 def _json_from_text(text: str) -> dict:
     match = re.search(r"\{[\s\S]*\}", text)
@@ -65,7 +69,18 @@ async def run_agent_text(
         message_parts.extend(inline_parts)
 
     async def _collect() -> str:
+        global _LAST_CALL_TIME
         async with _GEMINI_LOCK:
+            # Pacing: Ensure we don't start requests too close together
+            now = asyncio.get_event_loop().time()
+            elapsed = now - _LAST_CALL_TIME
+            if elapsed < _MIN_PACING_DELAY:
+                wait_time = _MIN_PACING_DELAY - elapsed
+                print(f"[Runner] Pacing Gemini call: waiting {wait_time:.2f}s...")
+                await asyncio.sleep(wait_time)
+            
+            _LAST_CALL_TIME = asyncio.get_event_loop().time()
+            
             last = ""
             async for event in runner.run_async(
                 user_id=user_id,
@@ -83,7 +98,7 @@ async def run_agent_text(
             return last
 
     max_retries = 3
-    retry_delay = 10
+    base_retry_delay = 10
 
     for attempt in range(max_retries):
         try:
@@ -94,9 +109,15 @@ async def run_agent_text(
             return last_text
         except (RuntimeError, Exception) as e:
             error_str = str(e)
-            if ("429" in error_str or "RESOURCE_EXHAUSTED" in error_str) and attempt < max_retries - 1:
-                print(f"[Runner] Quota reached (429). Waiting {retry_delay}s for cool down...")
-                await asyncio.sleep(retry_delay)
+            is_quota_error = any(code in error_str for code in ["429", "RESOURCE_EXHAUSTED", "Too Many Requests"])
+            
+            if is_quota_error and attempt < max_retries - 1:
+                # Exponential backoff with jitter to help multiple instances desync
+                import random
+                wait_multiplier = 2 ** attempt
+                actual_delay = (base_retry_delay * wait_multiplier) + random.uniform(2, 8)
+                print(f"[Runner] Quota reached (429). Waiting {actual_delay:.2f}s for cool down...")
+                await asyncio.sleep(actual_delay)
                 continue
             
             if isinstance(e, asyncio.TimeoutError):
