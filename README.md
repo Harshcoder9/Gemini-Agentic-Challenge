@@ -7,7 +7,7 @@ Retail investors are overwhelmed by scattered financial data, complex charts, an
 ![FinAgent PriceChart](./docs/assets/Pricechart.png)
 ![FinAgent News Sentiments](./docs/assets/news_sentiments.png)
 ![FinAgent Chart Vision](./docs/assets/ChartVision.png)
-![FinAgent Portfolio](./docs/assets/Portfolio.png)
+![FinAgent Portfolio](./docs/assets/portfolio.png)
 ![FinAgent Portfolio Risk](./docs/assets/Diversification.png)
 
 ---
