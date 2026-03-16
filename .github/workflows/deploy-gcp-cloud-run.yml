@@ -16,6 +16,9 @@ env:
   AR_REPOSITORY: ${{ vars.GAR_REPOSITORY || 'finagent-images' }}
   BACKEND_SERVICE: finagent-backend
   FRONTEND_SERVICE: finagent-frontend
+  BACKEND_MIN_INSTANCES: ${{ vars.BACKEND_MIN_INSTANCES || '1' }}
+  BACKEND_MAX_INSTANCES: ${{ vars.BACKEND_MAX_INSTANCES || '3' }}
+  BACKEND_CONCURRENCY: ${{ vars.BACKEND_CONCURRENCY || '20' }}
 
 jobs:
   deploy:
@@ -68,8 +71,9 @@ jobs:
             --set-env-vars "AGENT_APP_NAME=finagent,AGENT_MODEL=gemini-2.0-flash" \
             --set-secrets "GEMINI_API_KEY=GEMINI_API_KEY:latest,NEWS_API_KEY=NEWS_API_KEY:latest,ALLOWED_ORIGINS=ALLOWED_ORIGINS:latest" \
             --timeout=300 \
-            --max-instances=1 \
-            --concurrency=10 \
+            --min-instances="$BACKEND_MIN_INSTANCES" \
+            --max-instances="$BACKEND_MAX_INSTANCES" \
+            --concurrency="$BACKEND_CONCURRENCY" \
             --project "$PROJECT_ID"
 
       - name: Get backend URL
